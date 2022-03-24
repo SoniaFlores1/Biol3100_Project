@@ -1,0 +1,58 @@
+---
+title: "PalmerPenguins Example"
+author: "Sonia Flores"
+date: "3/24/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Run Cleaning script and load packages
+```{r message=FALSE, warning=FALSE}
+source("./R/01_clean_data_ex_.R")
+source("./R/palette_example.R")
+library(tidyverse)
+library(easystats)
+library(broom)
+library(kableExtra)
+
+```
+
+Our data has now been cleaned and now we can import the clean version for analysis.
+
+Let's take a glimps of our data set
+```{r message=FALSE, warning=FALSE}
+clean <- read_csv("./Data/Cleaned/clean_penguin_data_example.csv")
+glimpse(clean)
+```
+
+We will do a quick visualization.
+```{r message=FALSE, warning=FALSE}
+clean %>% 
+  ggplot(aes(x=species, y=body_mass_g, fill=sex))+
+  geom_boxplot()+
+  theme_minimal()
+```
+
+How about a quick ANOVA...
+```{r message=FALSE, warning=FALSE}
+mod<- aov(data= clean,
+          formula= body_mass_g ~ species + sex)
+tidy(mod) %>% 
+  kable() %>% 
+  kable_classic()
+
+mod %>% 
+  TukeyHSD() %>% 
+  plot()
+```
+
+
+
+
+
+
+
+
