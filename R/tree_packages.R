@@ -15,24 +15,39 @@ library(ggtree)
 library(msa)
 
 read.FASTA(file ="./Data/Raw/archosauria_18s_rrna.fasta")
+read.FASTA(file ="./Data/Raw/musophagidae_12s_trnaval_16s.fasta")
+read.FASTA(file ="./Data/Raw/neognathae_12s_trnaval_16s_trnaleu.fasta")
 
 Biostrings::readDNAStringSet(filepath = "./Data/Raw/archosauria_18s_rrna.fasta")
 
 #Reading in sequences as a DNAStringSet
 filepath<- "./Data/Raw/archosauria_18s_rrna.fasta"
+filepath2<- "./Data/Raw/musophagidae_12s_trnaval_16s.fasta"
+filepath3<- "./Data/Raw/neognathae_12s_trnaval_16s_trnaleu.fasta"
 mySeqs<- readDNAStringSet(filepath)
 
+mySeqs2<-readDNAStringSet(c(filepath, filepath2, filepath3))
 
 #sequence alignment (ClustalW and Muscle)
-alignment <- msa::msaClustalW(inputSeqs =mySeqs, cluster = "nj",type = "dna")
+alignmentW <- msa::msaClustalW(inputSeqs =mySeqs, cluster = "nj",type = "dna")
 alignmentM<- msa::msaMuscle(inputSeqs = mySeqs, cluster = "neighborjoining", type = "dna")
+
+alignmentW2<- msaClustalW(inputSeqs = mySeqs2, cluster= "nj",type="dna")
+#alignmentM2<- msaMuscle(inputSeqs= mySeqs2, cluster = "upgmb", type= "dna",
+                        #maxiters=5)
+print(alignmentW2, show="complete")
+
+msaPrettyPrint(alignmentW2, output="asis", showNames="none",
+               showLogo="none", askForOverwrite=FALSE, verbose=FALSE)
+
 
 #Conservation scores
 data("BLOSUM62")
 ClustalWScore<-msa::msaConservationScore(alignment, BLOSUM62)
 
-
-align_phyDat<-msa::msaConvert(x=alignment, type = "phangorn::phyDat")
+#converting the msa alignments to other files
+align_phyDat<-msa::msaConvert(x=alignmentW, type = "phangorn::phyDat")
+align_phyApe<- msa::msaConvert(x = alignmentW, type="ape::DNAbin")
 
 #In Phangorn now, making a distance matrix (Maximum Likelihood)
 phydist <- dist.ml(align_phyDat)
@@ -42,5 +57,17 @@ nj <- phangorn::NJ(phydist)
 
 #plotting a tree
 plot(nj, main="nj")
+
+#messing with ggtrees
+ggt<-ggtree(nj, cex = 1, aes(color=branch.length))+
+  scale_color_continuous(high='lightskyblue1',low='coral4')+
+  geom_tiplab(align=TRUE, size=2)+
+  geom_treescale(y = - 4, color = "coral4", fontsize = 5)
+
+njmsaplot<-msaplot(ggt, align_phyApe, offset = 0.009, width=1, height = 0.5)
+njmsaplot
+
+#experimenting with ape.
+ape::dist.dna(align_phyApe, model="JC69", as.matrix = TRUE )
 
 
