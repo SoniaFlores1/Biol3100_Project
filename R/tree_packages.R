@@ -43,3 +43,4 @@ nj <- phangorn::NJ(phydist)
 #plotting a tree
 plot(nj, main="nj")
 
+
