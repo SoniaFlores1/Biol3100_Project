@@ -11,11 +11,13 @@ BiocManager::install("ggtree")
 BiocManager::install("Biostrings")
 BiocManager::install("msa")
 BiocManager::install("ggmsa")
+BiocManager::install("ShortRead")
 
 library(Biostrings)
 library(ggtree)
 library(msa)
 library(ggmsa)
+library(ShortRead)
 
 
 read.FASTA(file ="./Data/Raw/archosauria_18s_rrna.fasta")
@@ -28,35 +30,62 @@ Biostrings::readDNAStringSet(filepath = "./Data/Raw/archosauria_18s_rrna.fasta")
 filepath<- "./Data/Raw/archosauria_18s_rrna.fasta"
 filepath2<- "./Data/Raw/musophagidae_12s_trnaval_16s.fasta"
 filepath3<- "./Data/Raw/neognathae_12s_trnaval_16s_trnaleu.fasta"
+#Reading in with ShortRead
+seqs<- ShortRead::readFasta(c(filepath,filepath2,filepath3))
+seqs@id
+
+seqs@id<-
+  paste0(
+  seqs@id %>% 
+    as.character() %>% 
+    str_split(" ") %>% 
+    map_chr(2),
+  " ",
+  seqs@id %>% 
+    str_split(" ") %>% 
+    map_chr(3)
+) %>% BStringSet()
+
+seqs@id
+seqs@sread
+
+
 #mySeqs<- readDNAStringSet(filepath)
 
 mySeqs2<-readDNAStringSet(c(filepath, filepath2, filepath3))
-mySeqs2
-
-#obtaining taxonomic names from accession numbers
-prepareDatabase('accessionTaxa.sql')
 
 
-accessions_nums<- mySeqs2 %>% names() %>% 
-str_split(" ") %>% 
-  map_chr(1)
+#obtaining taxonomic names from accession numbers with taxonomizr####
+#NOTE! This will make a database and will take some time to make
+#Please make sure you have the time and internet bandwidth to do this.
+#also try to save this in a more central location instead of copying it for
+#each project
+#prepareDatabase('accessionTaxa.sql')
 
-taxonomizr::accessionToTaxa(accessions = accession_nums, 'accessionTaxa.sql')
+
+#accessions_nums<- mySeqs2 %>% names() %>% 
+#str_split(" ") %>% 
+  #map_chr(1)
+
+#taxonomizr::accessionToTaxa(accessions = accession_nums, 'accessionTaxa.sql')
 
 #sequence alignment (ClustalW and Muscle)####
 #alignmentW <- msa::msaClustalW(inputSeqs =mySeqs, cluster = "nj",type = "dna")
 #alignmentM<- msa::msaMuscle(inputSeqs = mySeqs, cluster = "neighborjoining", type = "dna")
 
 alignmentW2<- msaClustalW(inputSeqs = mySeqs2, cluster= "nj",type="dna")
-#alignmentM2<- msaMuscle(inputSeqs= mySeqs2, cluster = "upgmb", type= "dna",
-                        #maxiters=5)
+alignmentM2<- msaMuscle(inputSeqs= mySeqs2, cluster = "upgmb", type= "dna",
+                        maxiters=5)
+
 print(alignmentW2, show="complete")
+msa::msaConsensusSequence(x = alignmentW2)
+
 ape_alignW2<-msa::msaConvert(x = alignmentW2,type="ape::DNAbin")
 
 
 
 tidyW2<-tidy_msa(msa=ape_alignW2, start = 10, end= 70)
-ggplot()+ggmsa::geom_msa(data=tidy, font=NULL)
+ggplot()+ggmsa::geom_msa(data=tidyW2, font=NULL)
 
 #Conservation scores####
 data("BLOSUM62")
@@ -87,4 +116,11 @@ njmsaplot
 #experimenting with ape.####
 ape::dist.dna(align_phyApe, model="JC69", as.matrix = TRUE )
 
+
+
+
+
+
+#look into
+library(ShortRead)
 
