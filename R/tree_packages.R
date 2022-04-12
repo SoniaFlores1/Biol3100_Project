@@ -33,7 +33,7 @@ filepath3<- "./Data/Raw/neognathae_12s_trnaval_16s_trnaleu.fasta"
 #Reading in with ShortRead
 seqs<- ShortRead::readFasta(c(filepath,filepath2,filepath3))
 seqs@id
-
+#changing the sequence IDs with ShortRead
 seqs@id<-
   paste0(
   seqs@id %>% 
@@ -49,11 +49,26 @@ seqs@id<-
 seqs@id
 seqs@sread
 
+View(seqs@id)
 
+#Make a new Fasta file with ShortRead that includes the changes made to IDs
+ShortRead::writeFasta(object = seqs, file = "./Data/Cleaned/sequences.fasta", mode ="w")
+#NOTE: Mode 'w' is used to create a new Fasta file. Mode 'a" is used to append an existing Fasta.
+#Now read that new file in for alignment
+sequences<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences.fasta")
+
+duplicated(sequences)
+#We'll need to give some unique identifiers to each sequence to avoid errors from duplicate names
+sequences_s<- ShortRead::readFasta("./Data/Cleaned/sequences.fasta")
+
+newids <- BStringSet(paste0(sequences_s@id, "_",1:length(sequences_s)))
+sequences_s@id <- newids
+writeFasta(sequences_s,"./Data/Cleaned/sequences_nonredundant.fasta")
+
+cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundant.fasta")
 #mySeqs<- readDNAStringSet(filepath)
 
-mySeqs2<-readDNAStringSet(c(filepath, filepath2, filepath3))
-
+#mySeqs2<-readDNAStringSet(c(filepath, filepath2, filepath3))
 
 #obtaining taxonomic names from accession numbers with taxonomizr####
 #NOTE! This will make a database and will take some time to make
@@ -73,27 +88,44 @@ mySeqs2<-readDNAStringSet(c(filepath, filepath2, filepath3))
 #alignmentW <- msa::msaClustalW(inputSeqs =mySeqs, cluster = "nj",type = "dna")
 #alignmentM<- msa::msaMuscle(inputSeqs = mySeqs, cluster = "neighborjoining", type = "dna")
 
-alignmentW2<- msaClustalW(inputSeqs = mySeqs2, cluster= "nj",type="dna")
-alignmentM2<- msaMuscle(inputSeqs= mySeqs2, cluster = "upgmb", type= "dna",
-                        maxiters=5)
-
-print(alignmentW2, show="complete")
-msa::msaConsensusSequence(x = alignmentW2)
-
-ape_alignW2<-msa::msaConvert(x = alignmentW2,type="ape::DNAbin")
+alignmentW<- msa::msaClustalW(inputSeqs =cleanseq, cluster = "nj", type = "dna")
 
 
+#alignmentW2<- msaClustalW(inputSeqs = mySeqs2, cluster= "nj",type="dna")
+#alignmentM2<- msaMuscle(inputSeqs= mySeqs2, cluster = "upgmb", type= "dna",
+                        #maxiters=5)
 
-tidyW2<-tidy_msa(msa=ape_alignW2, start = 10, end= 70)
-ggplot()+ggmsa::geom_msa(data=tidyW2, font=NULL)
+print(alignmentW, show="complete")
+msa::msaConsensusSequence(x = alignmentW)
+
+#Save alignment in new Fasta as a DNAStringset
+writeFasta(DNAStringSet(alignmentW),"./Data/Cleaned/alignmentW.fasta")
+
+#load the Fasta
+
+alignmentset <- DNAStringSet(alignmentW)
+alignmentset
+
+#using ggmsa to display alignment in a graphical format
+ggmsa::ggmsa(alignmentset, char_width=0.9, border="Blue",start = 10,end=60)
+ggsave("")
+?ggmsa
+
+#ape_alignW<-msa::msaConvert(x = alignmentW,type="ape::DNAbin")
+
+
+
+#tidyW<-tidy_msa(msa=ape_alignW, start = 15, end= 55) 
+                                                    
+#ggplot()+ggmsa::geom_msa(data=tidyW, font=NULL)
 
 #Conservation scores####
-data("BLOSUM62")
-ClustalWScore<-msa::msaConservationScore(alignment, BLOSUM62)
+#data("BLOSUM62")
+#ClustalWScore<-msa::msaConservationScore(alignment, BLOSUM62)
 
 #converting the msa alignments to other files####
 align_phyDat<-msa::msaConvert(x=alignmentW, type = "phangorn::phyDat")
-align_phyApe<- msa::msaConvert(x = alignmentW, type="ape::DNAbin")
+
 
 #In Phangorn now, making a distance matrix (Maximum Likelihood)####
 phydist <- dist.ml(align_phyDat)
@@ -110,17 +142,17 @@ ggt<-ggtree(nj, cex = 1, aes(color=branch.length))+
   geom_tiplab(align=TRUE, size=2)+
   geom_treescale(y = - 4, color = "coral4", fontsize = 5)
 
+gtt2<-ggtree(nj, mapping=NULL, layout='rectangular',root.position = -4)+
+  geom_tiplab(alignt=TRUE, size=5)+
+  geom_treescale(y=3, fontsize=3)
+
+
+
 njmsaplot<-msaplot(ggt, align_phyApe, offset = 0.009, width=1, height = 0.5)
 njmsaplot
 
-#experimenting with ape.####
-ape::dist.dna(align_phyApe, model="JC69", as.matrix = TRUE )
 
 
 
 
-
-
-#look into
-library(ShortRead)
 
