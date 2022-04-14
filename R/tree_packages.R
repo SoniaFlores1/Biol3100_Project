@@ -90,7 +90,7 @@ cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundant.f
 
 alignmentW<- msa::msaClustalW(inputSeqs =cleanseq, cluster = "nj", type = "dna")
 
-
+alignmentM<- msa::msaMuscle(inputSeqs=cleanseq, cluster="neighborjoining", type="dna")
 #alignmentW2<- msaClustalW(inputSeqs = mySeqs2, cluster= "nj",type="dna")
 #alignmentM2<- msaMuscle(inputSeqs= mySeqs2, cluster = "upgmb", type= "dna",
                         #maxiters=5)
@@ -98,13 +98,21 @@ alignmentW<- msa::msaClustalW(inputSeqs =cleanseq, cluster = "nj", type = "dna")
 print(alignmentW, show="complete")
 msa::msaConsensusSequence(x = alignmentW)
 
+print(alignmentM, show="complete")
+
+
 #Save alignment in new Fasta as a DNAStringset
-writeFasta(DNAStringSet(alignmentW),"./Data/Cleaned/alignmentW.fasta")
+ShortRead::writeFasta(DNAStringSet(alignmentW),"./Data/Cleaned/alignmentW.fasta")
+
+ShortRead::writeFasta(DNAStringSet(alignmentM),"./Data/Cleaned/alignmentM.fasta")
 
 #load the Fasta
 
-alignmentset <- DNAStringSet(alignmentW)
-alignmentset
+alignmentWset <- DNAStringSet(alignmentW)
+alignmentWset
+
+alignmentMset<- DNAStringSet(alignmentM)
+alignmentMset
 
 #using ggmsa to display alignment in a graphical format
 ggmsa::ggmsa(alignmentset, char_width=0.9, border="Blue",start = 10,end=60)
@@ -126,12 +134,33 @@ ggsave("")
 #converting the msa alignments to other files####
 align_phyDat<-msa::msaConvert(x=alignmentW, type = "phangorn::phyDat")
 
+align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
 
 #In Phangorn now, making a distance matrix (Maximum Likelihood)####
-phydist <- dist.ml(align_phyDat)
+phydist <- dist.ml(align_phyDatM)
 
 #applying neighborjoining ####
 nj <- phangorn::NJ(phydist)
+
+njtrees<- bootstrap.phyDat(align_phyDatM, FUN=function(x)nj(dist.ml(x)),bs=20)
+treesnj<- plotBS(tree=nj, njtrees, type = "phylogram" )
+
+#maximum likelihood
+fit<-pml(nj, align_phyDatM)
+fit<- optim.pml(fit, rearrangement = "NNI")
+bs<- bootstrap.pml(fit, bs=20, optNni=TRUE)
+treeBS<- plotBS(tree=fit$tree, bs, type = "phylogram")
+
+#Maximum Parsimony
+treeMP<- pratchet(align_phyDatM)
+treeMP<- acctran(treeMP, align_phyDatM)
+BStrees<- bootstrap.phyDat(align_phyDatM, pratchet, bs=20)
+treeMP2<- plotBS(treeMP, BStrees, type="phylogram")
+
+#You can also do modelTest and bootstrap to find the best models to use for the tree
+#But DO NOT RUN on SurfacePro!!!!
+#mt<- modeltest(align_phyDatM)
+
 
 #plotting a tree####
 plot(nj, main="nj")
@@ -143,16 +172,14 @@ ggt<-ggtree(nj, cex = 1, aes(color=branch.length))+
   geom_treescale(y = - 4, color = "coral4", fontsize = 5)
 
 gtt2<-ggtree(nj, mapping=NULL, layout='rectangular',root.position = -4)+
-  geom_tiplab(alignt=TRUE, size=5)+
-  geom_treescale(y=3, fontsize=3)
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(y=6, fontsize=3,x = 0.5)+
+  ggtree::geom_nodelab(node= 'internal')
+options(ignore.negative.edge=TRUE)
 
 
 
-njmsaplot<-msaplot(ggt, align_phyApe, offset = 0.009, width=1, height = 0.5)
-njmsaplot
-
-
-
+#NOTE: LOOK at DECIPHER Package for multiple sequence alignments, too
 
 
 
