@@ -176,10 +176,11 @@ p <- ggtree(tree2, aes(color=group), branch.length="none") +
   ggtree::geom_nodelab(node= 'internal')
 
 p
-scaleClade(p, node=101, scale=.1)
-  
+scaleClade(p, node=101, scale=.1)  
 
 #NOTE: LOOK at DECIPHER Package for multiple sequence alignments, too
 
-
+#End comments: I have Alignments and Tree building down, but
+#Some trouble with the trees and how some organisms are grouped
+#still need to be resolved.
 
