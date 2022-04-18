@@ -12,13 +12,14 @@ BiocManager::install("Biostrings")
 BiocManager::install("msa")
 BiocManager::install("ggmsa")
 BiocManager::install("ShortRead")
+BiocManager::install("DECIPHER")
 
 library(Biostrings)
 library(ggtree)
 library(msa)
 library(ggmsa)
 library(ShortRead)
-
+library(DECIPHER)
 
 read.FASTA(file ="./Data/Raw/archosauria_18s_rrna.fasta")
 read.FASTA(file ="./Data/Raw/musophagidae_12s_trnaval_16s.fasta")
@@ -80,8 +81,15 @@ alignmentM<- msa::msaMuscle(inputSeqs=cleanseq, cluster="neighborjoining", type=
 
 print(alignmentM, show="complete")
 
+#sequence alignment with DECIPHER ####
 
-#Save alignment in new Fasta as a DNAStringset
+aligned<-DECIPHER::AlignSeqs(cleanseq)
+
+DECIPHER::BrowseSeqs(aligned)
+writeXStringSet(aligned,
+                file="./Data/Cleaned/DECIPH_align.fasta")
+
+#Save alignment in new Fasta as a DNAStringset####
 
 ShortRead::writeFasta(DNAStringSet(alignmentM),"./Data/Cleaned/alignmentM.fasta")
 
@@ -107,6 +115,9 @@ ggsave(filename="musclealign_img.png", path ="./Images", dpi="print" , width=11,
 #converting the msa alignments to other files####
 
 align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
+
+
+fdir <- system.file("./Data/Cleaned/DECIPH_align.fasta", package = "phangorn")
 
 
 #In Phangorn now, making a distance matrix (Maximum Likelihood)####
