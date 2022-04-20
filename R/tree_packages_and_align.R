@@ -88,6 +88,7 @@ aligned<-DECIPHER::AlignSeqs(cleanseq)
 DECIPHER::BrowseSeqs(aligned)
 writeXStringSet(aligned,
                 file="./Data/Cleaned/DECIPH_align.fasta")
+alignDeci<- read.FASTA("./Data/Cleaned/DECIPH_align.fasta")
 
 #Save alignment in new Fasta as a DNAStringset####
 
@@ -117,15 +118,19 @@ ggsave(filename="musclealign_img.png", path ="./Images", dpi="print" , width=11,
 align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
 
 
-fdir <- system.file("./Data/Cleaned/DECIPH_align.fasta", package = "phangorn")
+deci_phyDat<- as.phyDat(alignDeci)
 
 
 #In Phangorn now, making a distance matrix (Maximum Likelihood)####
 phydist <- dist.ml(align_phyDatM)
 
+deciphydist<- dist.ml(deci_phyDat)
+
 #making some trees####
 nj <- phangorn::NJ(phydist)
 upgma<- phangorn::upgma(phydist)
+
+deci_nj<-phangorn::NJ(deciphydist)
 
 #adding roots
 ape::is.rooted(nj)
@@ -140,6 +145,9 @@ root_upgma<-ape::root(phy = upgma,"Didelphis virginiana_79",
 
 is.rooted(root_upgma)
 
+ape::is.rooted(deci_nj)
+root_deci_nj<- ape::root(phy=deci_nj, "Didelphis virginiana_79",
+                         resolve.root=TRUE)
 
 
 #simple plotting
@@ -147,6 +155,8 @@ plot(nj, main="nj")
 plot(upgma, main="UPGMA" )
 plot(root_upgma)
 plot(root_upgma, main="upgma")
+
+plot(root_deci_nj)
 
 #Model testing for trees (do not run on Surfcace Pro!!)
 mt<- modelTest(align_phyDatM, root_upgma)
@@ -195,3 +205,62 @@ scaleClade(p, node=101, scale=.1)
 #Some trouble with the trees and how some organisms are grouped
 #still need to be resolved.
 
+#Second attempt with only 16s genes
+f1<-"./Data/Raw/archosauria_16s.fasta"
+f2<-"./Data/Raw/musophagidae_16s.fasta"
+f3<-"./Data/Raw/neognathae_16s.fasta"
+f4<-"./Data/Raw/other_16s.fasta"
+
+seqs<- ShortRead::readFasta(c(f1,f2,f3,f4))
+seqs@id
+
+seqs@id<-
+  paste0(
+    seqs@id %>% 
+      as.character() %>% 
+      str_split(" ") %>% 
+      map_chr(2),
+    " ",
+    seqs@id %>% 
+      str_split(" ") %>% 
+      map_chr(3)
+  ) %>% BStringSet()
+
+seqs@id
+seqs@sread
+
+ShortRead::writeFasta(object = seqs, file = "./Data/Cleaned/sequences2.fasta", mode ="w")
+sequences<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences2.fasta")
+
+
+sequences_s<- ShortRead::readFasta("./Data/Cleaned/sequences2.fasta")
+newids <- BStringSet(paste0(sequences_s@id, "_",1:length(sequences_s)))
+sequences_s@id <- newids
+sequences_s@id
+
+writeFasta(sequences_s,"./Data/Cleaned/sequences_nonredundant2.fasta")
+
+cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundant2.fasta")
+
+alignmentM<-msa::msaMuscle(inputSeqs=cleanseq, cluster="neighborjoining", type="dna", order="input")
+print(alignmentM, show="complete")
+
+align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
+
+phydist<-dist.ml(align_phyDatM)
+
+
+nj<- phangorn::NJ(phydist)
+
+ape::is.rooted(nj)
+root_nj<-ape::root(phy = nj,"Didelphis virginiana_51",
+           resolve.root=TRUE)
+
+plot(root_nj)
+
+gtt2<-ggtree(root_nj, mapping=NULL, branch.length="none" ,root.position = -1)+
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(fontsize=3)+
+  ggtree::geom_nodelab(node= 'internal')
+
+#It was the genes. look for other genes (COI, 18s, etc.)
