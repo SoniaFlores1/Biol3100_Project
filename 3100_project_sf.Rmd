@@ -1,0 +1,97 @@
+---
+title: "Multiple Sequence Alignment and Tree Construction"
+author: "Sonia Flores"
+date: "4/30/2022"
+output: html_document
+---
+
+## Introduction
+
+Studies in molecular evolution and genetics often explore how regions of DNA or
+genes are conserved or change within a species; these DNA sequences may also be
+conserved among other species of organisms. Phylogenies then display how organisms
+within a species or among various species relate to each other based on differences
+and similarities within a given DNA region.
+
+R contains several packages that are capable of performing the tasks necessary
+for Multiple Sequence Alignments and Phylogeny construction.
+We will demonstrate these capabilities by aligning and building phylogenies using
+some genes conserved among birds to display their relationships to each other.
+
+
+## Methods
+
+### The Organisms
+Bird species were chosen to represent as many classes as possible beneath the
+order Aves. The genes picked for this study are mitochondrial genes known to be
+conserved among Eukaryotic organisms. 
+Organisms in the outgroup include the American Alligator, Red-Eared Slider,
+American Rattlesnake, and Eastern Opossum. Alligators share common ancestry with
+birds, while turtles share an ancestor with crocodylians, but not birds. 
+
+### R Packages
+The following packages were used for reading DNA data, multiple sequence alignment,
+and tree construction:
+"ape", "phangorn", "ShortRead", "Biostrings","msa", "ggmsa", and "ggtree". 
+
+ShortRead and Biostrings packages were used to read in FASTA files and to convert
+them into a DNA String Set format respectively. ShortRead was also used to create
+FASTA files which contained all the sequences for a given gene into a single file
+with clean names to avoid redundancy. 
+The msa package was used to perform multiple sequence alignments while ggmsa cleaned
+and displayed given sections of an alignment.
+Phangorn was used to construct trees from the alignment files while ape rooted the
+trees to the outgroup. Finally, ggtree was used to present the trees in a readable
+format
+
+
+### Sequence clean up
+Sequences were collected from NCBI's Genbank database as FASTA files. These files
+include the accession number for the genes, the species descriptor and a descriptor
+for the sequence data such as the name of the genes. 
+Files were read together into R using ShortRead, with some clean up done on the
+names to leave only the species name and a numerical identifier to prevent redundancy
+for each sequence. These files were saved into their own FASTA files.
+ 
+
+### Multiple Sequence Alignment 
+These new FASTA files were loaded into R in a DNAStringSet format, where Multiple
+Sequence Alignment could be performed through the msa package. msa contains several
+methods of aligning sequences: ClustalOmega, ClustalW, and MUSCLE. Each alignment
+type also utilize various methods of clustering the alignments, however due to known
+issues with clustering in msa, only the Neighbor Joining method was used. The resulting
+alignments are displayed in a MultipleSequenceAlignment format, though for Phylogeny
+Construction the alignments were saved under new FASTA files. 
+
+Images of the alignments were constructed using ggmsa to display a clean alignment
+for viewing. Because many alignments were too long to display in their entirety,
+only a section of each alignment was displayed.
+
+
+### Construction of Phylogenies
+Tree construction was done mainly through phangorn. The aligned sequences saved
+as FASTA files were read into R as a phyDat file. Distance matrices were applied 
+to phyDat files, then were built into simple neighbor-joining trees. 
+Before moving on, the ape package was used to root the trees to the outgroup. 
+
+From here, bootstrap values were added to the trees and re-rooted if necessary.
+
+Finally, trees were cleaned using ggtree to display the trees in a readable,
+sleek format.
+
+
+##Results
+
+###Multiple Sequence Alignments
+
+
+###Phylogenies
+
+
+##Conclusions
+R has access to many useful sequence alignment tools for molecular comparison and
+tree construction tools 
+
+
+
+

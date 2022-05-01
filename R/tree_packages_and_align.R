@@ -229,21 +229,24 @@ seqs@id<-
 seqs@id
 seqs@sread
 
-ShortRead::writeFasta(object = seqs, file = "./Data/Cleaned/sequences2.fasta", mode ="w")
-sequences<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences2.fasta")
+ShortRead::writeFasta(object = seqs, file = "./Data/Cleaned/sequences_16s.fasta", mode ="w")
+sequences<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_16s.fasta")
 
 
-sequences_s<- ShortRead::readFasta("./Data/Cleaned/sequences2.fasta")
+sequences_s<- ShortRead::readFasta("./Data/Cleaned/sequences16s.fasta")
 newids <- BStringSet(paste0(sequences_s@id, "_",1:length(sequences_s)))
 sequences_s@id <- newids
 sequences_s@id
 
-writeFasta(sequences_s,"./Data/Cleaned/sequences_nonredundant2.fasta")
+writeFasta(sequences_s,"./Data/Cleaned/sequences_nonredundant16s.fasta")
 
-cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundant2.fasta")
+cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundant16s.fasta")
 
 alignmentM<-msa::msaMuscle(inputSeqs=cleanseq, cluster="neighborjoining", type="dna", order="input")
 print(alignmentM, show="complete")
+
+
+ShortRead::writeFasta(DNAStringSet(alignmentM),"./Data/Cleaned/alignmentM_16s.fasta")
 
 align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
 
