@@ -15,11 +15,32 @@ root_nj<-ape::root(phy = nj,"Didelphis virginiana_51",
 
 plot(root_nj)
 #Build tree####
-gtt2<-ggtree(root_nj, mapping=NULL, branch.length="none" ,root.position = -1)+
+fit <- pml(root_nj, align_phyDatM)
+fit <- optim.pml(fit, rearrangement="NNI")
+
+bs <- bootstrap.pml(fit, bs=100, optNni=TRUE)
+treeBS <- plotBS(fit$tree, bs, type ="phylogram")
+
+root_bs<- ape::root(phy = treeBS,"Didelphis virginiana_51", resolve.root=TRUE)
+plotBS(root_bs, type="phylogram")
+
+
+gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none" ,root.position = -5)+
+  geom_tiplab(alignt=FALSE, size=3)+
+  ggtree::geom_nodelab(node= 'internal')
+gtt2
+
+tree2 <- groupClade(root_bs, c(83,55,90))
+p <- ggtree(tree2, aes(color=group), branch.length="none") + 
+  scale_color_manual(values=c("black","firebrick", "steelblue", "orchid"))+
   geom_tiplab(alignt=FALSE, size=3)+
   geom_treescale(fontsize=3)+
   ggtree::geom_nodelab(node= 'internal')
-gtt2
+p
+
+ggsave(filename="16s_tree.png", path ="./Images", dpi="print" ,
+       width=20, height=15)
+
 
 #Build COI tree####
 alignMCOISet<- readDNAMultipleAlignment("./Data/Cleaned/alignmentM_COI.fasta")
@@ -38,7 +59,16 @@ root_nj<-ape::root(phy = nj,"Didelphis virginiana_41",
 
 plot(root_nj)
 
-gtt2<-ggtree(root_nj, mapping=NULL, branch.length="none" ,root.position = -1)+
+fit <- pml(root_nj, align_phyDatM)
+fit <- optim.pml(fit, rearrangement="NNI")
+
+bs <- bootstrap.pml(fit, bs=100, optNni=TRUE)
+treeBS <- plotBS(fit$tree, bs, type ="phylogram")
+
+root_bs<- ape::root(phy = treeBS,"Didelphis virginiana_41", resolve.root=TRUE)
+plotBS(root_bs, type="phylogram")
+
+gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none" ,root.position = -1)+
   geom_tiplab(alignt=FALSE, size=3)+
   geom_treescale(fontsize=3)+
   ggtree::geom_nodelab(node= 'internal')
