@@ -139,24 +139,3 @@ ggsave(filename="COImusclealign_img.png", path ="./Images", dpi="print" ,
        width=11, height=9)
 
 
-
-align_phyDatM<-msa::msaConvert(x=alignMCOISet, type= "phangorn::phyDat")
-
-phydist<-dist.ml(align_phyDatM)
-
-
-nj<- phangorn::NJ(phydist)
-
-ape::is.rooted(nj)
-root_nj<-ape::root(phy = nj,"Didelphis virginiana_41",
-                   resolve.root=TRUE)
-
-plot(root_nj)
-
-gtt2<-ggtree(root_nj, mapping=NULL, branch.length="none" ,root.position = -1)+
-  geom_tiplab(alignt=FALSE, size=3)+
-  geom_treescale(fontsize=3)+
-  ggtree::geom_nodelab(node= 'internal')
-
-gtt2
-
