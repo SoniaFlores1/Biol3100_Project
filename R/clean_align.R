@@ -67,26 +67,7 @@ ggmsa(alignM18s, 225, 350, color = "Chemistry_NT", font = "DroidSansMono",
       char_width = 0.7, seq_name = TRUE, border=NA, by_conservation=TRUE)
 
 ggsave(filename="18smusclealign_img.png", path ="./Images", dpi="print" ,
-       width=11, height=9)
-#Converting alignments to phyDat####
-align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
-
-phydist<-dist.ml(align_phyDatM)
-
-
-nj<- phangorn::NJ(phydist)
-
-ape::is.rooted(nj)
-root_nj<-ape::root(phy = nj,"Didelphis virginiana_37",
-                   resolve.root=TRUE)
-
-plot(root_nj)
-#Build tree####
-gtt2<-ggtree(root_nj, mapping=NULL, branch.length="none" ,root.position = -1)+
-  geom_tiplab(alignt=FALSE, size=3)+
-  geom_treescale(fontsize=3)+
-  ggtree::geom_nodelab(node= 'internal')
-gtt2
+       width=11, height=4)
 
 
 #All that again, but for the COI sequences####
@@ -136,6 +117,16 @@ ggmsa(alignMCOI, 250, 375, color = "Chemistry_NT", font = "DroidSansMono",
       char_width = 0.7, seq_name = TRUE, border=NA, by_conservation=TRUE)
 
 ggsave(filename="COImusclealign_img.png", path ="./Images", dpi="print" ,
-       width=11, height=9)
+       width=11, height=4)
 
+#16s Alignment####
+alignM16s<- read.FASTA("./Data/Cleaned/alignmentM_16s.fasta")
 
+alignM16sSet<- readDNAMultipleAlignment("./Data/Cleaned/alignmentM_16s.fasta")
+print(alignM16sSet)
+
+ggmsa(alignM16s, 250, 375, color = "Chemistry_NT", font = "DroidSansMono", 
+      char_width = 0.7, seq_name = TRUE, border=NA, by_conservation=TRUE)
+
+ggsave(filename="16smusclealign_img.png", path ="./Images", dpi="print" ,
+       width=11, height=4)
