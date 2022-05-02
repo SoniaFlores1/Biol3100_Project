@@ -57,6 +57,17 @@ print(alignmentM, show="complete")
 
 ShortRead::writeFasta(DNAStringSet(alignmentM),"./Data/Cleaned/alignmentM_18s.fasta")
 
+#creating alignment graphic####
+alignM18s<- read.FASTA("./Data/Cleaned/alignmentM_18s.fasta")
+
+alignM18sSet<- readDNAMultipleAlignment("./Data/Cleaned/alignmentM_18s.fasta")
+print(alignM18sSet)
+
+ggmsa(alignM18s, 225, 350, color = "Chemistry_NT", font = "DroidSansMono", 
+      char_width = 0.7, seq_name = TRUE, border=NA, by_conservation=TRUE)
+
+ggsave(filename="18smusclealign_img.png", path ="./Images", dpi="print" ,
+       width=11, height=9)
 #Converting alignments to phyDat####
 align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
 
@@ -116,7 +127,20 @@ print(alignmentM, show="complete")
 
 ShortRead::writeFasta(DNAStringSet(alignmentM),"./Data/Cleaned/alignmentM_COI.fasta")
 
-align_phyDatM<-msa::msaConvert(x=alignmentM, type= "phangorn::phyDat")
+alignMCOI<- read.FASTA("./Data/Cleaned/alignmentM_COI.fasta")
+
+alignMCOISet<- readDNAMultipleAlignment("./Data/Cleaned/alignmentM_COI.fasta")
+print(alignMCOISet)
+
+ggmsa(alignMCOI, 250, 375, color = "Chemistry_NT", font = "DroidSansMono", 
+      char_width = 0.7, seq_name = TRUE, border=NA, by_conservation=TRUE)
+
+ggsave(filename="COImusclealign_img.png", path ="./Images", dpi="print" ,
+       width=11, height=9)
+
+
+
+align_phyDatM<-msa::msaConvert(x=alignMCOISet, type= "phangorn::phyDat")
 
 phydist<-dist.ml(align_phyDatM)
 
