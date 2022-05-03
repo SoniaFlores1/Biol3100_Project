@@ -37,15 +37,25 @@ Organisms in the outgroup include the American Alligator, Red-Eared Slider,
 Prairie Rattlesnake, and Eastern Opossum. Alligators share common ancestry with
 birds, while turtles share an ancestor with crocodylians, but not birds. 
 
+```{r echo=FALSE, warning=FALSE}
+library(readxl)
+list_of_organisms <- read_xlsx("Data/Raw/list_of_organisms.xlsx")
+knitr::kable(list_of_organisms,
+ caption = "List of Organisms")
+
+```
+
+
 
 ### R Packages
 The following packages were used for reading DNA data, multiple sequence alignment,
 and tree construction:
 ```{r eval=FALSE, warning=FALSE}
 library(tidyverse)
-library(BiocManager)
 library(ape)
 library(phangorn)
+library(BiocManager)
+
 library(Biostrings)
 library(ggtree)
 library(msa)
@@ -53,7 +63,9 @@ library(ggmsa)
 library(ShortRead)
 ```
 
-
+The top four libraries are available through CRAN while the last five are obtained
+through BioConductor. The BiocManager package is used to install other BioConductor
+related packages.
 
 ### Sequence clean up
 Sequences were collected from NCBI's Genbank database as FASTA files. These files
@@ -151,6 +163,13 @@ root_nj<-ape::root(phy = nj,"Didelphis virginiana_51",
 
 From here, bootstrap values were added to the trees and re-rooted if necessary.
 Bootstrapping was repeated 100 times for each tree.
+
+We chose the Maximum Likelihood method of tree construction as opposed to methods
+such as Maximum Parsimony or other distance-based methods because it tends to be
+the most accurate method of constructing trees under a wider variety of conditions.
+In exchange, this method relies on the evolutionary model chosen to account for
+base pair changes.
+
 Boostrapping is a test that utilizes random sampling and resampling to test how
 often the same branch is observed on a phylogenetic tree. A score is given to each
 node on a branch to show how many times out of 100 that particular branch is seen.
@@ -201,6 +220,10 @@ While these images only display a given 125 base pair long section of the alignm
 we can see some significant overlap between most sequences, as well as highly
 conserved sections of the sequences across all species as denoted by the bold
 coloration of the cells. The colorless dashed cells indicate gaps in the alignment.
+Several sequences in the alignments have multiple gaps scattered throughout the
+alignment while others tend to show gaps in the same areas of a given alignment.
+These gaps indicate missing sequence data either due to errors in extracting or 
+cleaning DNA or unspecified base calls during sequencing. 
 
 
 
@@ -218,6 +241,10 @@ Across all trees the outgroups were colored black, the Palaeognathae Birds are
 denoted by red, and Neoganathae birds are colored in blue. Some clades which appear
 to be completely misplaced on the tree are shown in pink.
 
+Several branches on each of the trees show some consistency with how many times
+they are observed on the trees, however other nodes either display low bootstrap
+scores for closely associated clades or high scores for clades that should not
+have close relationships.
 
 
 ## Conclusions
@@ -231,18 +258,25 @@ due to known errors in msa when using UPGMA clustering methods. Alignment using
 msa also suffered from memory leak issues when aligning more than 50 sequences 
 or very long sequences, especially when large gaps were present.
 
-The msa package is a good introduction to sequence alignment in R, however for
-serious studies using sequence alignment, other alignment packages are available
-for use with better ongoing support and options for clustering. 
-
 While the msa package had its issues with aligning the sequences, the sequences
 themselves may also play a part into why the alignments and resulting trees from
-those alignmnets displayed strange relationships between organisms. While NCBI is
+those alignments displayed strange relationships between organisms. While NCBI is
 an expansive depository for DNA, RNA, and protein sequences, it is not well curated
 and some sequences may be erroneously named or misrepresentative of the gene or
-proteins they describe. 
+proteins they describe.
 
+With regards to the Phylogenies, Maximum Likelihood trees depends heavily on the
+alignments themselves to obtain a good model to use in order to predict nucleotide
+changes at any position in the aligned sequences. If the sequences are not aligned
+in the best way possible, then the evolutionary model chosen to construct the tree
+may not appropriately represent what is actually happening between the organisms
+represented on the tree.
 
+The msa package is a good introduction to sequence alignment in R, however for
+serious studies using sequence alignment, other alignment packages are available
+for use with better ongoing support and options for clustering. Better alignment
+tools will also improve the accuracy of trees constructed from the resulting
+alignments. 
 
 ## Reference to Study
 Marcel van Tuinen, Charles G. Sibley, S. Blair Hedges, The Early History of Modern Birds Inferred from DNA Sequences of Nuclear and Mitochondrial Ribosomal Genes, Molecular Biology and Evolution, Volume 17, Issue 3, March 2000, Pages 451–457, https://doi.org/10.1093/oxfordjournals.molbev.a026324
