@@ -33,13 +33,13 @@ root_bs<- ape::root(phy = treeBS,"Didelphis virginiana_51", resolve.root=TRUE)
 plotBS(root_bs, type="phylogram")
 
 
-gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none" ,root.position = -5)+
+gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none",root.position = -5)+
   geom_tiplab(alignt=FALSE, size=3)+
   ggtree::geom_nodelab(node= 'internal')
 gtt2
 
 tree2 <- groupClade(root_bs, c(83,55,90))
-p <- ggtree(tree2, aes(color=group), branch.length="none") + 
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="rectangular") + 
   scale_color_manual(values=c("black","firebrick", "steelblue", "orchid"))+
   geom_tiplab(alignt=FALSE, size=3)+
   geom_treescale(fontsize=3)+
@@ -49,6 +49,32 @@ p
 ggsave(filename="16s_tree.png", path ="./Images", dpi="print" ,
        width=20, height=15)
 
+#Radial version
+fit <- pml(root_nj, align_phyDatM)
+fit <- optim.pml(fit, rearrangement="NNI")
+
+bs <- bootstrap.pml(fit, bs=100, optNni=TRUE)
+treeBS <- plotBS(fit$tree, bs, type ="radial")
+
+root_bs<- ape::root(phy = treeBS,"Didelphis virginiana_51", resolve.root=TRUE)
+plotBS(root_bs, type="radial")
+
+
+gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none",layout="circular" ,root.position = -5)+
+  geom_tiplab(alignt=FALSE, size=3)+
+  ggtree::geom_nodelab(node= 'internal')
+gtt2
+
+tree2 <- groupClade(root_bs, c(83,55,90))
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="circular") + 
+  scale_color_manual(values=c("black","firebrick", "steelblue", "orchid"))+
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(fontsize=3)+
+  ggtree::geom_nodelab(node= 'internal')
+p
+
+ggsave(filename="16s_radtree.png", path ="./Images", dpi="print" ,
+       width=20, height=15)
 
 #Build COI tree####
 alignMCOISet<- readDNAMultipleAlignment("./Data/Cleaned/alignmentM_COI.fasta")
@@ -84,7 +110,7 @@ gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none" ,root.position = -1)+
 gtt2
 
 tree2 <- groupClade(root_bs, c(70, 58, 75,78, 57))
-p <- ggtree(tree2, aes(color=group), branch.length="none") + 
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="rectangular") + 
   scale_color_manual(values=c("black","firebrick", "steelblue", "orchid", "black","firebrick"))+
   geom_tiplab(alignt=FALSE, size=3)+
   geom_treescale(fontsize=3)+
@@ -93,6 +119,36 @@ p
 
 ggsave(filename="COI_tree.png", path ="./Images", dpi="print" ,
        width=20, height=15)
+
+#radial version
+fit <- pml(root_nj, align_phyDatM)
+fit <- optim.pml(fit, rearrangement="NNI")
+
+bs <- bootstrap.pml(fit, bs=100, optNni=TRUE)
+treeBS <- plotBS(fit$tree, bs, type ="radial")
+
+root_bs<- ape::root(phy = treeBS,"Didelphis virginiana_41", resolve.root=TRUE)
+plotBS(root_bs, type="radial")
+
+
+gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none",layout="circular" ,root.position = -5)+
+  geom_tiplab(alignt=FALSE, size=3)+
+  ggtree::geom_nodelab(node= 'internal')
+gtt2
+
+tree2 <- groupClade(root_bs, c(70, 58, 75,78, 57))
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="circular") + 
+  scale_color_manual(values=c("black","firebrick", "steelblue", "orchid", "black","firebrick"))+
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(fontsize=3)+
+  ggtree::geom_nodelab(node= 'internal')
+p
+
+
+ggsave(filename="COI_radtree.png", path ="./Images", dpi="print" ,
+       width=20, height=15)
+
+
 
 #Build 18s Tree####
 
@@ -130,7 +186,7 @@ gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none" ,root.position = -1)+
 gtt2
 
 tree2 <- groupClade(root_bs, c(66, 51, 62))
-p <- ggtree(tree2, aes(color=group), branch.length="none") + 
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="rectangular") + 
   scale_color_manual(values=c("black", "black", "steelblue", "firebrick","orchid","firebrick"))+
   geom_tiplab(alignt=FALSE, size=3)+
   geom_treescale(fontsize=3)+
@@ -140,4 +196,24 @@ p
 ggsave(filename="18s_tree.png", path ="./Images", dpi="print" ,
        width=20, height=15)
 
+#radial version
+plotBS(root_bs, type="radial")
+
+gtt2<-ggtree(root_bs, mapping=NULL, branch.length="none" ,layout="circular",root.position = -1)+
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(fontsize=3)+
+  ggtree::geom_nodelab(node= 'internal')
+
+gtt2
+
+tree2 <- groupClade(root_bs, c(66, 51, 62))
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="circular") + 
+  scale_color_manual(values=c("black", "black", "steelblue", "firebrick","orchid","firebrick"))+
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(fontsize=3)+
+  ggtree::geom_nodelab(node= 'internal')
+p
+
+ggsave(filename="18s_radtree.png", path ="./Images", dpi="print" ,
+       width=20, height=15)
 

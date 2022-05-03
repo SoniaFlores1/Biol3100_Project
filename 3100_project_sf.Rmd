@@ -193,7 +193,7 @@ while also highlighting parts of the tree.
 
 ```{r eval=FALSE}
 tree <- groupClade(root_bs, c(83,55,90))
-p <- ggtree(tree, aes(color=group), branch.length="none") + 
+p <- ggtree(tree2, aes(color=group), branch.length="none", layout="rectangular") + 
   scale_color_manual(values=c("black","firebrick", "steelblue", "orchid"))+
   geom_tiplab(alignt=FALSE, size=3)+
   geom_treescale(fontsize=3)+
@@ -229,13 +229,19 @@ cleaning DNA or unspecified base calls during sequencing.
 
 ### Phylogenies
 [![16s Tree](Images/16s_tree.png)](https://soniaflores1.github.io/images/16s_tree.png)
-Bootstrapped Maximum Likelihood Tree from 16s Subunit Gene
+
+[![16s Circular Tree](Images/16s_radtree.png)](http://soniaflores1.github.io/images/16s_radtree.png)
+Bootstrapped Rectangular and Circular Maximum Likelihood Trees from 16s Subunit Gene
 
 [![18s Tree](Images/18s_tree.png)](https://soniaflores1.github.io/images/18s_tree.png)
-Bootstrapped Maximum Likelihood Tree from 18s Subunit Gene
+
+[![18s Circular Tree](Images/18s_radtree.png)](http://soniaflores1.github.io/images/18s_radtree.png)
+Bootstrapped Rectangular and Circular Maximum Likelihood Tree from 18s Subunit Gene
 
 [![COI Tree](Images/COI_tree.png)](https://soniaflores1.github.io/images/COI_tree.png)
-Bootstrapped Maximum Likelihood Tree from Cytochrome Oxidase I Gene
+
+[![COI Circular Tree](Images/COI_radtree.png)](http://soniaflores1.github.io/images/COI_radtree.png)
+Bootstrapped Rectangular and Circular Maximum Likelihood Tree from Cytochrome Oxidase I Gene
 
 Across all trees the outgroups were colored black, the Palaeognathae Birds are
 denoted by red, and Neoganathae birds are colored in blue. Some clades which appear
