@@ -1,9 +1,11 @@
 ---
 title: "Multiple Sequence Alignment and Tree Construction"
 author: "Sonia Flores"
-date: "4/30/2022"
 output: html_document
 ---
+```{r warning=FALSE, include=FALSE}
+library(tidyverse)
+```
 
 ## Introduction
 
@@ -32,7 +34,7 @@ Palaeognathae ("Basal" birds) and Neognathae which contain the majority of livin
 birds.
 
 Organisms in the outgroup include the American Alligator, Red-Eared Slider,
-American Rattlesnake, and Eastern Opossum. Alligators share common ancestry with
+Prairie Rattlesnake, and Eastern Opossum. Alligators share common ancestry with
 birds, while turtles share an ancestor with crocodylians, but not birds. 
 
 
@@ -62,7 +64,7 @@ names to leave only the species name and a numerical identifier to prevent redun
 for each sequence. 
 
 ```{r eval=FALSE, warning=FALSE}
-seqs<-ShortRead::readFasta(c(f1,f2))
+seqs<-ShortRead::readFasta(c(f1,f2,f3))
 
 seqs@id<-
   paste0(
@@ -77,6 +79,16 @@ seqs@id<-
   ) %>% BStringSet()
 
 seqs@id
+
+ShortRead::writeFasta(object = seqs, file = "./Data/Cleaned/sequences_16s.fasta", mode ="w")
+sequences<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_16s.fasta")
+
+sequences_s<- ShortRead::readFasta("./Data/Cleaned/sequences_16s.fasta")
+newids <- BStringSet(paste0(sequences_s@id, "_",1:length(sequences_s)))
+sequences_s@id <- newids
+sequences_s@id
+
+writeFasta(sequences_s,"./Data/Cleaned/sequences_nonredundant16s.fasta")
 ```
 
 
@@ -91,42 +103,105 @@ type also utilize various methods of clustering the alignments, however due to k
 issues with clustering in msa, only the Neighbor Joining method was used. 
 
 ```{r eval=FALSE, warning=FALSE}
-cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundantCOI.fasta")
+cleanseq<- Biostrings::readDNAStringSet("./Data/Cleaned/sequences_nonredundant16s.fasta")
 
 alignmentM<-msa::msaMuscle(inputSeqs=cleanseq, cluster="neighborjoining", type="dna", order="input")
 ```
 
 
-
 The resulting alignments are displayed in a MultipleSequenceAlignment format, 
 though for Phylogeny Construction the alignments were saved under new FASTA files. 
+```{r eval=FALSE}
+ShortRead::writeFasta(DNAStringSet(alignmentM),"./Data/Cleaned/alignmentM_16s.fasta")
+```
+
 
 Images of the alignments were constructed using ggmsa to display a clean alignment
 for viewing. Because many alignments were too long to display in their entirety,
 only a section of each alignment was displayed.
+```{r eval=FALSE}
+alignM16s<- read.FASTA("./Data/Cleaned/alignmentM_16s.fasta")
+ggmsa(alignM16s, 250, 375, color = "Chemistry_NT", font = "DroidSansMono", 
+      char_width = 0.7, seq_name = TRUE, border=NA, by_conservation=TRUE)
+```
+
 
 
 ### Construction of Phylogenies
 Tree construction was done mainly through phangorn. The aligned sequences saved
-as FASTA files were read into R as a phyDat file. Distance matrices were applied 
-to phyDat files, then were built into simple neighbor-joining trees. 
+as FASTA files were read into R first as a DNAMultipleAlignment file, then a
+phyDat file. Distance matrices were applied to phyDat files, then were built into 
+a simple neighbor-joining tree. 
 Before moving on, the ape package was used to root the trees to the outgroup. 
+```{r eval=FALSE}
+alignM16sSet<- readDNAMultipleAlignment("./Data/Cleaned/alignmentM_16s.fasta")
+
+align_phyDatM<-msa::msaConvert(x=alignM16sSet, type= "phangorn::phyDat")
+
+phydist<-dist.ml(align_phyDatM)
+
+
+nj<- phangorn::NJ(phydist)
+
+ape::is.rooted(nj)
+root_nj<-ape::root(phy = nj,"Didelphis virginiana_51",
+                   resolve.root=TRUE)
+```
+
 
 From here, bootstrap values were added to the trees and re-rooted if necessary.
+Bootstrapping was repeated 100 times for each tree.
+Boostrapping is a test that utilizes random sampling and resampling to test how
+often the same branch is observed on a phylogenetic tree. A score is given to each
+node on a branch to show how many times out of 100 that particular branch is seen.
+Scores between 90 to 100 are good indicators that the branch is well supported.
+Scores below 90 have less confidence in supporting the indicated relationship.
 
-Finally, trees were cleaned using ggtree to display the trees in a readable,
-sleek format.
+```{r eval=FALSE}
+fit <- pml(root_nj, align_phyDatM)
+fit <- optim.pml(fit, rearrangement="NNI")
+
+bs <- bootstrap.pml(fit, bs=100, optNni=TRUE)
+treeBS <- plotBS(fit$tree, bs, type ="phylogram")
+
+root_bs<- ape::root(phy = treeBS,"Didelphis virginiana_51", resolve.root=TRUE)
+plotBS(root_bs, type="phylogram")
+```
+
+
+Finally, trees were cleaned using ggtree to display the trees in a readable format
+while also highlighting parts of the tree.
+
+```{r eval=FALSE}
+tree <- groupClade(root_bs, c(83,55,90))
+p <- ggtree(tree, aes(color=group), branch.length="none") + 
+  scale_color_manual(values=c("black","firebrick", "steelblue", "orchid"))+
+  geom_tiplab(alignt=FALSE, size=3)+
+  geom_treescale(fontsize=3)+
+  ggtree::geom_nodelab(node= 'internal')
+```
 
 
 ## Results
 
 ### Multiple Sequence Alignments
 
-```{r  echo=FALSE, out.width='120%', out.height='100%'}
-knitr::include_graphics('./Images/16smusclealign_img.png')
-knitr::include_graphics('./Images/18smusclealign_img2.png')
-knitr::include_graphics('./Images/COImusclealign_img.png')
-```
+
+![Multiple Sequence Alignment for 16s Gene](Images/16smusclealign_img.png)
+A section of the aligned 16s Gene sequences in birds and outgroup animals
+
+![Multiple Sequence Alignment for 18s Gene](Images/18smusclealign_img2.png)
+A section of the aligned 18s Gene sequences in birds and outgroup animals
+
+
+![Multiple Sequence Alignment for COI Gene](Images/COImusclealign_img.png)
+A section of the aligned Cytochrome Oxidase I Gene sequences in birds and outgroup animals
+
+While these images only display a given 125 base pair long section of the alignments,
+we can see some significant overlap between most sequences, as well as highly
+conserved sections of the sequences across all species as denoted by the bold
+coloration of the cells. The colorless dashed cells indicate gaps in the alignment.
+
 
 
 ### Phylogenies
@@ -139,10 +214,34 @@ Bootstrapped Maximum Likelihood Tree from 18s Subunit Gene
 ![COI Tree](Images/COI_tree.png)
 Bootstrapped Maximum Likelihood Tree from Cytochrome Oxidase I Gene
 
+Across all trees the outgroups were colored black, the Palaeognathae Birds are
+denoted by red, and Neoganathae birds are colored in blue. Some clades which appear
+to be completely misplaced on the tree are shown in pink.
+
+
 
 ## Conclusions
-R has access to many useful sequence alignment tools for molecular comparison and
-tree construction tools 
+R has access to many useful sequence alignment tools for molecular and genetic
+analyses, as well as many ways to construct and format trees to display the
+relationships derived from those analyses. The msa package is one of the easier
+alignment tools to use, however it has significant limitations with what types of
+clustering it can do, as well as technical issues with certain alignment types.
+As mentioned earlier, only the Neighbor Joining method of clustering was available
+due to known errors in msa when using UPGMA clustering methods. Alignment using
+msa also suffered from memory leak issues when aligning more than 50 sequences 
+or very long sequences, especially when large gaps were present.
+
+The msa package is a good introduction to sequence alignment in R, however for
+serious studies using sequence alignment, other alignment packages are available
+for use with better ongoing support and options for clustering. 
+
+While the msa package had its issues with aligning the sequences, the sequences
+themselves may also play a part into why the alignments and resulting trees from
+those alignmnets displayed strange relationships between organisms. While NCBI is
+an expansive depository for DNA, RNA, and protein sequences, it is not well curated
+and some sequences may be erroneously named or misrepresentative of the gene or
+proteins they describe. 
+
 
 
 ## Reference to Study
