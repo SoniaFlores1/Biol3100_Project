@@ -206,14 +206,14 @@ p <- ggtree(tree, aes(color=group), branch.length="none") +
 ### Multiple Sequence Alignments
 
 
-![Multiple Sequence Alignment for 16s Gene](Images/16smusclealign_img.png)
+[![Multiple Sequence Alignment for 16s Gene](Images/16smusclealign_img.png)](https://soniaflores1.github.io/images/16smusclealign_img.png)
 A section of the aligned 16s Gene sequences in birds and outgroup animals
 
-![Multiple Sequence Alignment for 18s Gene](Images/18smusclealign_img2.png)
+[![Multiple Sequence Alignment for 18s Gene](Images/18smusclealign_img2.png)](https://soniaflores1.github.io/images/18smusclealign_img2.png)
 A section of the aligned 18s Gene sequences in birds and outgroup animals
 
 
-![Multiple Sequence Alignment for COI Gene](Images/COImusclealign_img.png)
+[![Multiple Sequence Alignment for COI Gene](Images/COImusclealign_img.png)](https://soniaflores1.github.io/images/COImusclealign_img.png)
 A section of the aligned Cytochrome Oxidase I Gene sequences in birds and outgroup animals
 
 While these images only display a given 125 base pair long section of the alignments,
@@ -228,13 +228,13 @@ cleaning DNA or unspecified base calls during sequencing.
 
 
 ### Phylogenies
-![16s Tree](Images/16s_tree.png)
+[![16s Tree](Images/16s_tree.png)](https://soniaflores1.github.io/images/16s_tree.png)
 Bootstrapped Maximum Likelihood Tree from 16s Subunit Gene
 
-![18s Tree](Images/18s_tree.png)
+[![18s Tree](Images/18s_tree.png)](https://soniaflores1.github.io/images/18s_tree.png)
 Bootstrapped Maximum Likelihood Tree from 18s Subunit Gene
 
-![COI Tree](Images/COI_tree.png)
+[![COI Tree](Images/COI_tree.png)](https://soniaflores1.github.io/images/COI_tree.png)
 Bootstrapped Maximum Likelihood Tree from Cytochrome Oxidase I Gene
 
 Across all trees the outgroups were colored black, the Palaeognathae Birds are
